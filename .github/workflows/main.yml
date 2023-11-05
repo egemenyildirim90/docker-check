@@ -3,7 +3,7 @@ name: Your Deployment Workflow
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -36,4 +36,3 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk
         run: eb deploy
-        
