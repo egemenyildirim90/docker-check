@@ -1,35 +1,27 @@
-name: Your Deployment Workflow
-
+name: Deploy Frontend
 on:
   push:
     branches:
       - master
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
+      - run: docker run -e CI=true cygnetops/react-test npm test
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v18
         with:
-          python-version: 3.10.5  # Python sürümünü belirtin
-
-      - name: Install EB CLI
-        run: |
-          pip install awsebcli --upgrade --user
-
-      - name: Configure AWS Credentials
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set default.region eu-central-1
-
-      - name: Use Elastic Beanstalk Environment
-        run: eb use Docker1-env
-
-      - name: Deploy to Elastic Beanstalk
-        run: eb deploy
+          application_name: docker1
+          environment_name: Docker1-env
+          existing_bucket_name: elasticbeanstalk-eu-central-1-364263409989
+          region: eu-central-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
