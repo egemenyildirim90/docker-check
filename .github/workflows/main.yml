@@ -1,41 +1,39 @@
-name: Deploy to Elastic Beanstalk
+name: Your Deployment Workflow
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      run: |
-        echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-        echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
 
-    - name: Login to AWS Elastic Beanstalk
-      run: |
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws configure set default.region eu-central-1
-        eb init -p docker docker1
-        eb use Docker1-env
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-central-1
-        EB_APPLICATION_NAME: docker1
-        EB_ENVIRONMENT_NAME: Docker1-env
+      - name: Install EB CLI
+        run: |
+          pip install awsebcli --upgrade --user
 
-    - name: Build and deploy to Elastic Beanstalk
-      run: |
-        docker build -t egemenyildirim90/web .
-        eb deploy
-      env:
-        DOCKER_IMAGE_NAME: egemenyildirim90/web
+      - name: Configure AWS Credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region eu-central-1
 
+      - name: Initialize Elastic Beanstalk
+        run: eb init -p docker docker1
+
+      - name: Use Elastic Beanstalk Environment
+        run: eb use Docker1-env
+
+      - name: Deploy to Elastic Beanstalk
+        run: eb deploy
+        
