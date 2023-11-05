@@ -29,7 +29,7 @@ jobs:
           aws configure set default.region eu-central-1
 
       - name: Initialize Elastic Beanstalk
-        run: eb init -p docker docker1
+        run: sudo eb init -p docker docker1
 
       - name: Use Elastic Beanstalk Environment
         run: eb use Docker1-env
