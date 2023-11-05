@@ -28,9 +28,6 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set default.region eu-central-1
 
-      - name: Initialize Elastic Beanstalk
-        run: sudo eb init -p docker docker1
-
       - name: Use Elastic Beanstalk Environment
         run: eb use Docker1-env
 
