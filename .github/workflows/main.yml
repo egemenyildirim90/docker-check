@@ -3,7 +3,7 @@ name: Deploy to Elastic Beanstalk
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -18,10 +18,24 @@ jobs:
         echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
         echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
 
-    - name: Deploy to Elastic Beanstalk
+    - name: Login to AWS Elastic Beanstalk
       run: |
-        npm install # Or any necessary build steps
-        npm run build
-        eb deploy docker1-env
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        aws configure set default.region eu-central-1
+        eb init -p docker docker1
+        eb use Docker1-env
       env:
-        NODE_ENV: production
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-central-1
+        EB_APPLICATION_NAME: docker1
+        EB_ENVIRONMENT_NAME: Docker1-env
+
+    - name: Build and deploy to Elastic Beanstalk
+      run: |
+        docker build -t egemenyildirim90/web .
+        eb deploy
+      env:
+        DOCKER_IMAGE_NAME: egemenyildirim90/web
+
