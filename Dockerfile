@@ -2,8 +2,8 @@ FROM node:16-alpine as builder
 WORKDIR '/app'
 COPY package.json .
 RUN npm install
-COPY . .
 EXPOSE 80
+COPY . .
 RUN npm run build
 RUN npm install bootstrap
 
