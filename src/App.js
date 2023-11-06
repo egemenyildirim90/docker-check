@@ -1,6 +1,6 @@
 import './App.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function App() {
   const [question, setQuestion] = useState('');
@@ -12,6 +12,13 @@ function App() {
 
     // Clear the input field
     setQuestion('');
+  }
+
+  // Klavyeden Enter tuşuna basıldığında "Send" işlemi
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleQuestionSubmit();
+    }
   }
 
   return (
@@ -26,6 +33,7 @@ function App() {
               placeholder="Ask"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
+              onKeyPress={handleKeyPress} // Klavye olayını dinle
             />
             <div className="input-group-append">
               <button className="btn btn-primary" onClick={handleQuestionSubmit}>
